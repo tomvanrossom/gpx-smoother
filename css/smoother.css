@@ -173,6 +173,11 @@ rect.pane {
   fill: transparent;
 }
 
+.waypoints {
+  stroke: black;
+  fill: transparent;
+}
+
 .original {
   stroke: blue;
   fill: transparent;

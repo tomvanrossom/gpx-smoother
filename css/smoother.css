@@ -174,6 +174,11 @@ rect.pane {
 }
 
 .waypoints {
+  stroke: orange;
+  fill: transparent;
+}
+
+.peakValley {
   stroke: black;
   fill: transparent;
 }

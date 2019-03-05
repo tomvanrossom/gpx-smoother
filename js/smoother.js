@@ -281,12 +281,14 @@ $(document).ready(function(){
                         // still going up
                     }else{
                         // high was reached
+                        smoothValues[i - 1].waypoint = {type: 'peak'}
                         wayPointValues.push(smoothValues[i-1]);
                         goUp = false;
                     }
                 }else{
                     if(previousEle < currentEle){
                         // low was reached
+                        smoothValues[i - 1].waypoint = {type: 'valley'}
                         wayPointValues.push(smoothValues[i-1]);
                         goUp = true;
                     }else{
@@ -298,24 +300,56 @@ $(document).ready(function(){
         }
         wayPointValues.push(smoothValues[dataLength-1]);
 
+        graph.setLine(wayPointValues, "peakValley", true);
+
         //clear bumps
 
-        var clearedWP = [];
+        var clearedWPBefore = wayPointValues;
+        var clearedWP;
+        for (var j = 0; j < 1; j++) {
+            console.log("NEXT run");
+            skipping = false;
+            clearedWP = [clearedWPBefore[0]];
 
-        var one = wayPointValues[0];
-        var two = wayPointValues[1];
-        var three = wayPointValues[2];
-        var four = wayPointValues[3];
-        for (var i = 0; i < wayPointValues.length-4; i++) {
-            one = wayPointValues[i];
-            two = wayPointValues[i+1];
-            three = wayPointValues[i+2];
-            four = wayPointValues[i+3];
+            var one;
+            var two;
+            var three;
+            var four;
+            for (var i = 1; i < clearedWPBefore.length - 4; i++) {
+                one = clearedWPBefore[i];
+                two = clearedWPBefore[i + 1];
+                three = clearedWPBefore[i + 2];
+                four = clearedWPBefore[i + 3];
 
-            console.log(one.distance);
+                var deltaDistanceSlope = Math.abs(two.totalDistance - three.totalDistance);
+                var deltaDistanceSegment = Math.abs(one.totalDistance - four.totalDistance);
+                var deltaEleSlope = Math.abs(two.ele - three.ele);
+                var deltaEleSegment = Math.abs(one.ele - four.ele);
+
+                two.deltaDistanceProcent = deltaDistanceSlope / deltaDistanceSegment;
+                two.deltaEleProcent = deltaEleSlope / deltaEleSegment;
+
+                if (two.deltaDistanceProcent < 0.15 && two.deltaEleProcent < 0.15) {
+                    //console.log("skipping: " + i + " " + deltaDistanceSlope + " " + deltaEleSlope);
+
+                    i++;
+                } else {
+                    //console.log("not skipping: " + i + " " + deltaDistanceSlope + " " + deltaEleSlope);
+                    clearedWP.push(two);
+                }
+
+                //console.log(two);
+            }
+
+
+            clearedWPBefore = clearedWP;
+
+            graph.setLine(clearedWP, "waypoints", true);
         }
 
-        graph.setLine(wayPointValues, "waypoints", true);
+
+
+        skipping = false;
     }
 
     function setRange() {

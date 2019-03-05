@@ -281,14 +281,14 @@ $(document).ready(function(){
                         // still going up
                     }else{
                         // high was reached
-                        smoothValues[i - 1].waypoint = {type: 'peak'}
+                        smoothValues[i - 1].waypoint = {type: 'Summit'}
                         wayPointValues.push(smoothValues[i-1]);
                         goUp = false;
                     }
                 }else{
                     if(previousEle < currentEle){
                         // low was reached
-                        smoothValues[i - 1].waypoint = {type: 'valley'}
+                        smoothValues[i - 1].waypoint = {type: 'Valley'}
                         wayPointValues.push(smoothValues[i-1]);
                         goUp = true;
                     }else{
@@ -306,7 +306,7 @@ $(document).ready(function(){
 
         var clearedWPBefore = wayPointValues;
         var clearedWP;
-        for (var j = 0; j < 1; j++) {
+        for (var j = 0; j < 2; j++) {
             console.log("NEXT run");
             skipping = false;
             clearedWP = [clearedWPBefore[0]];
@@ -315,7 +315,7 @@ $(document).ready(function(){
             var two;
             var three;
             var four;
-            for (var i = 1; i < clearedWPBefore.length - 4; i++) {
+            for (var i = 0; i < clearedWPBefore.length - 4; i++) {
                 one = clearedWPBefore[i];
                 two = clearedWPBefore[i + 1];
                 three = clearedWPBefore[i + 2];
@@ -346,10 +346,25 @@ $(document).ready(function(){
 
             graph.setLine(clearedWP, "waypoints", true);
         }
-
-
-
         skipping = false;
+
+        for (var i = 0; i < clearedWP.length - 2; i++) {
+            var point = clearedWP[i];
+            //if(point.waypoint && point.waypoint.type ==='valley'){
+                var nextPoint = clearedWP[i+1];
+
+                var deltaDistance = nextPoint.totalDistance - point.totalDistance;
+                var deltaEle = nextPoint.ele - point.ele;
+                point.waypoint.deltaDistance = deltaDistance;
+                point.waypoint.deltaEle = deltaEle;
+                point.waypoint.slope = deltaEle / deltaDistance;
+                point.waypoint.name = Math.round(deltaDistance/100)/10+'K ' + Math.round(100 * point.waypoint.slope)+ '%'
+
+            //}
+            if(point.waypoint.deltaDistance > 400 && point.waypoint.deltaEle > 40){
+                console.log(point);
+            }
+        }
     }
 
     function setRange() {

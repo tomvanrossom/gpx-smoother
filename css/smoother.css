@@ -171,11 +171,19 @@ rect.pane {
 .modified {
   stroke: green;
   fill: transparent;
+  z-index: 50;
 }
 
 .waypoints {
   stroke: orange;
   fill: transparent;
+  z-index: 10;
+}
+
+.keep {
+  stroke: darkred;
+  z-index: 1;
+  stroke-width: 10;
 }
 
 .peakValley {
@@ -186,6 +194,7 @@ rect.pane {
 .original {
   stroke: blue;
   fill: transparent;
+  z-index: 100;
 }
 
 #mini .modified,

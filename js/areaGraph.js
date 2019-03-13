@@ -181,6 +181,7 @@ AreaGraph = function() {
 
   areaGraph.createElevationLine = function(linePoints, lineType) {
     var points = linePoints;
+      //console.log(points);
     focus.append("path")
       .attr("class", "elevation " + lineType)
       .datum(points)
@@ -193,7 +194,14 @@ AreaGraph = function() {
     focus.selectAll("dot")
       .data(points)
       .enter().append("circle")
-      .attr("class", lineType)
+        .attr("class", function (d) {
+            if (d.waypoint && d.waypoint.keep === true) {
+
+                return lineType + " keep";
+            } else {
+                return lineType;
+            }
+        })
       .attr("clip-path", "url(#clip)")
       .attr("r", 2)
       .attr("cx", function(d) {
@@ -217,11 +225,16 @@ AreaGraph = function() {
     tooltip.transition()
       .duration(200)
       .style("opacity", .9);
-    tooltip.html(
-      "<div>Slope: " + (parseInt(point.slope * 1000) / 10) +"%</div>" +
-      "<div>Distance: " + (parseInt(point.totalDistance / 10) / 100) + "km</div>" +
-      "<div>Elevation: " + (parseInt(point.ele * 100) / 100) + "m</div>");
-    var eltTooltip = d3.select(".tooltip").node();
+      if (point.waypoint) {
+          //console.log(point.waypoint);
+          tooltip.html("<div>" + point.waypoint.name + "</div>");
+      } else {
+          tooltip.html(
+              "<div>Slope: " + (parseInt(point.slope * 1000) / 10) + "%</div>" +
+              "<div>Distance: " + (parseInt(point.totalDistance / 10) / 100) + "km</div>" +
+              "<div>Elevation: " + (parseInt(point.ele * 100) / 100) + "m</div>");
+      }
+      var eltTooltip = d3.select(".tooltip").node();
     var width = eltTooltip.clientWidth;
     var xPos = offsetLeft - width/2 + margin.left;
     if (xPos + width > offsetLeft + dimensions.width) {

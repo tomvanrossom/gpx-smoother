@@ -269,6 +269,8 @@ $(document).ready(function(){
     }
 
     function wayPoints() {
+        var highestPoint = 0;
+        var lowestPoint = 4000;
         wayPointValues = [];
         var dataLength = smoothValues.length;
         var goUp = true;
@@ -284,6 +286,9 @@ $(document).ready(function(){
                         smoothValues[i - 1].waypoint = {type: 'Summit'};
                         wayPointValues.push(smoothValues[i-1]);
                         goUp = false;
+                        if (currentEle > highestPoint) {
+                            highestPoint = currentEle;
+                        }
                     }
                 }else{
                     if(previousEle < currentEle){
@@ -291,6 +296,9 @@ $(document).ready(function(){
                         smoothValues[i - 1].waypoint = {type: 'Valley'};
                         wayPointValues.push(smoothValues[i-1]);
                         goUp = true;
+                        if (currentEle < lowestPoint) {
+                            lowestPoint = currentEle;
+                        }
                     }else{
                         // still going down
                     }
@@ -299,6 +307,10 @@ $(document).ready(function(){
             previousEle = currentEle;
         }
         wayPointValues.push(smoothValues[dataLength-1]);
+
+        var totalDeltaElevation = highestPoint - lowestPoint;
+        console.log('highest point: ' + highestPoint + '; lowestPoint: ' + lowestPoint + '; delta elevation: ' + totalDeltaElevation);
+        var totalDistance = previousEle.totalDistance;
 
         graph.setLine(wayPointValues, "peakValley", true);
 
@@ -315,6 +327,7 @@ $(document).ready(function(){
             bumbsRemoved = countBefore != clearedWP.length;
         }
 
+        var keepCounter = 0;
         for (var i = 0; i < clearedWP.length - 2; i++) {
             var point = clearedWP[i];
             //if(point.waypoint && point.waypoint.type ==='valley'){
@@ -328,10 +341,23 @@ $(document).ready(function(){
             point.waypoint.name = Math.round(deltaDistance / 100) / 10 + 'K ' + Math.round(100 * point.waypoint.slope) + '%';
 
             //}
-            if(point.waypoint.deltaDistance > 400 && point.waypoint.deltaEle > 40){
-                console.log(point);
+            if (isWaypointToKeep(point, totalDeltaElevation, totalDistance)) {
+                point.waypoint.keep = true;
+                keepCounter++;
+                //console.log(point);
             }
         }
+        console.log('keepCounter: ' + keepCounter);
+        graph.setLine(clearedWP, "waypoints", true);
+    }
+
+    function isWaypointToKeep(point, totalDeltaElevation, totalDistance) {
+        if (point.waypoint.deltaDistance > 300 && point.waypoint.deltaEle > 40) {
+            return true
+        } else if (point.waypoint.deltaEle / totalDeltaElevation > 0.05 && point.waypoint.deltaDistance / totalDistance > 0.05) {
+            return true;
+        }
+        return false;
     }
 
     function removeBumbs(currentWaypointPoints) {

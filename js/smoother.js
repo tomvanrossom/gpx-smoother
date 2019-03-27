@@ -349,6 +349,8 @@ $(document).ready(function(){
         }
         console.log('keepCounter: ' + keepCounter);
         graph.setLine(clearedWP, "waypoints", true);
+
+        updateNewXML(gpxFile.generateNewGPX(xml, rawValues, clearedWP));
     }
 
     function isWaypointToKeep(point, totalDeltaElevation, totalDistance) {

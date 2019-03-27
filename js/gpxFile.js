@@ -57,7 +57,13 @@ GPXFile = function() {
     return(new XMLSerializer()).serializeToString(gpxDoc);
   };
 
-  gpxFile.generateNewGPX = function (xml, dataValues) {
+    gpxFile.appendChild = function (gpxDoc, node, childName, childValue) {
+        var newChild = gpxDoc.createElement(childName);
+        newChild.appendChild(gpxDoc.createTextNode(childValue));
+        node.appendChild(newChild);
+    };
+
+    gpxFile.generateNewGPX = function (xml, dataValues, wayPoints) {
     var gpxDoc = $.parseXML(xml);
     var eleTrkpt =  $(gpxDoc).find('trkpt');
     var numPoints = eleTrkpt.length;
@@ -73,6 +79,32 @@ GPXFile = function() {
         eleTrkpt[iDataValue].appendChild(newElevation);
       }
     }
+        if (wayPoints) {
+            var gpxRoot = $(gpxDoc).find('gpx')[0];
+            var track = $(gpxDoc).find('trk')[0];
+            var numWayPoints = wayPoints.length;
+            for (var iWayPoint = 0; iWayPoint < numWayPoints; iWayPoint++) {
+                var trackPoint = wayPoints[iWayPoint];
+                console.log(trackPoint);
+
+                if (trackPoint.waypoint && trackPoint.waypoint.name) {
+                    var newWayPoint = gpxDoc.createElement("wpt");
+
+                    newWayPoint.setAttribute('lat', trackPoint.lat);
+                    newWayPoint.setAttribute('lon', trackPoint.long);
+
+
+                    this.appendChild(gpxDoc, newWayPoint, "name", trackPoint.waypoint.name.toString());
+                    this.appendChild(gpxDoc, newWayPoint, "ele", trackPoint.ele.toString());
+                    this.appendChild(gpxDoc, newWayPoint, "type", trackPoint.waypoint.type.toString());
+                    this.appendChild(gpxDoc, newWayPoint, "sym", trackPoint.waypoint.type.toString().toLowerCase());
+
+
+                    gpxRoot.insertBefore(newWayPoint, track);
+                }
+            }
+            var gpxWaypoints = $(gpxDoc).find('wpt');
+        }
     return(new XMLSerializer()).serializeToString(gpxDoc);
   };
 

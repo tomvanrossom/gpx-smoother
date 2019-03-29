@@ -23,7 +23,7 @@
  THE SOFTWARE.
 
  */
-$(document).ready(function(){
+$(document).ready(function () {
 
     var DEFAULT_FILENAME = "smoother.gpx";
     var rawValues = [];
@@ -41,7 +41,7 @@ $(document).ready(function(){
     var eltElevationStatus = $('.eleStatus');
     var eltNumPoints = $("#numPoints");
     var graph = new AreaGraph();
-    var gpxFile= new GPXFile();
+    var gpxFile = new GPXFile();
     var fileName = DEFAULT_FILENAME;
     var gpxName = gpxFile.DEFAULT_GPXNAME;
     var gpxDescription = gpxFile.DEFAULT_DESCRIPTION;
@@ -60,10 +60,10 @@ $(document).ready(function(){
         $('.chartBar li').click(toggleChart);
         $(".chkHide").click(onHideOriginal);
 
-        eltGPXName.change(function() {
+        eltGPXName.change(function () {
             updateXMLMetadata();
         });
-        eltGPXDescription.change(function() {
+        eltGPXDescription.change(function () {
             updateXMLMetadata();
         });
 
@@ -79,10 +79,10 @@ $(document).ready(function(){
         var strSlope = '';
         if (numValues > 1) {
             totalSlope += .0000000005;  // Deal with floating point error
-            strSlope = strSlope + parseInt((totalSlope / (numValues - 1) ) * 10000) / 100;
+            strSlope = strSlope + parseInt((totalSlope / (numValues - 1)) * 10000) / 100;
         }
         $('.avg').text(strSlope + '%');
-        return(strSlope);
+        return (strSlope);
     }
 
     function updateUI(points, totalSlope) {
@@ -109,16 +109,16 @@ $(document).ready(function(){
         var targetButton = $(event.target).parent();
         targetButton.addClass('active');
         if (targetButton.hasClass('btnAbout')) {
-            var aboutSection =  $(".about");
+            var aboutSection = $(".about");
             $("body,html").stop().animate({scrollTop: 0}, 444);
             aboutSection.show();
-            aboutSection.stop().animate({height: ABOUT_HEIGHT, opacity: 1}, 555, "swing", function() {
+            aboutSection.stop().animate({height: ABOUT_HEIGHT, opacity: 1}, 555, "swing", function () {
             });
         } else if (targetButton.hasClass('btnUpdates')) {
-            var updateSection =  $(".newStuff");
+            var updateSection = $(".newStuff");
             $("body,html").stop().animate({scrollTop: 0}, 444);
             updateSection.show();
-            updateSection.stop().animate({height: UPDATE_HEIGHT, opacity: 1}, 555, "swing", function() {
+            updateSection.stop().animate({height: UPDATE_HEIGHT, opacity: 1}, 555, "swing", function () {
             });
         } else if (targetButton.hasClass('btnSmooth')) {
             $(".smootherView").show();
@@ -149,7 +149,7 @@ $(document).ready(function(){
             return;
         }
 
-        var smoothingSize = Math.floor(Number(eltNumPoints.val())/2);
+        var smoothingSize = Math.floor(Number(eltNumPoints.val()) / 2);
         if (smoothingSize < 2 || smoothingSize > dataLength / 2) {
             smoothingSize = 2;
             eltNumPoints.val(5);
@@ -171,7 +171,7 @@ $(document).ready(function(){
                 start = 0;
             }
             var end = i + smoothingSize;
-            if (end > dataLength - 1){
+            if (end > dataLength - 1) {
                 end = dataLength - 1;
             }
             for (var j = start; j <= end; j++) {
@@ -183,7 +183,7 @@ $(document).ready(function(){
         var previous = null;
         var totalSlope = 0;
         for (i = 0; i < dataLength; i++) {
-            var point = jQuery.extend(true, {},  toSmooth[i]);
+            var point = jQuery.extend(true, {}, toSmooth[i]);
             distance = distance + point.distance;
             if (distance >= startDistance && distance <= endDistance) {
                 point.ele = newElevations[i];
@@ -217,7 +217,7 @@ $(document).ready(function(){
         var endDistance = selected[1];
         var distance = 0;
         for (var i = 0; i < dataLength; i++) {
-            var point = jQuery.extend(true, {},  toFlatten[i]);
+            var point = jQuery.extend(true, {}, toFlatten[i]);
             if (previous) {
                 distance = distance + point.distance;
                 if (distance >= startDistance && distance <= endDistance) {
@@ -240,7 +240,7 @@ $(document).ready(function(){
         updateUI(smoothValues, totalSlope);
     }
 
-    function elevate () {
+    function elevate() {
         var dataLength = rawValues.length;
         if (dataLength === 0)
             return;
@@ -256,11 +256,11 @@ $(document).ready(function(){
         var endDistance = selected[1];
         var totalSlope = 0;
         for (var i = 0; i < dataLength; i++) {
-            var point = jQuery.extend(true, {},  toElevate[i]);
+            var point = jQuery.extend(true, {}, toElevate[i]);
             if (distance >= startDistance && distance <= endDistance) {
                 point.ele = point.ele + elevateValue;
             }
-            distance =  distance + point.distance;
+            distance = distance + point.distance;
             totalSlope = totalSlope + point.slope;
             elevatedValues.push(point);
         }
@@ -278,35 +278,35 @@ $(document).ready(function(){
         for (var i = 0; i < dataLength; i++) {
             var currentEle = smoothValues[i].ele;
             if (previousEle !== -1) {
-                if(goUp){
-                    if(previousEle < currentEle){
+                if (goUp) {
+                    if (previousEle < currentEle) {
                         // still going up
-                    }else{
+                    } else {
                         // high was reached
                         smoothValues[i - 1].waypoint = {type: 'Summit'};
-                        wayPointValues.push(smoothValues[i-1]);
+                        wayPointValues.push(smoothValues[i - 1]);
                         goUp = false;
                         if (currentEle > highestPoint) {
                             highestPoint = currentEle;
                         }
                     }
-                }else{
-                    if(previousEle < currentEle){
+                } else {
+                    if (previousEle < currentEle) {
                         // low was reached
                         smoothValues[i - 1].waypoint = {type: 'Valley'};
-                        wayPointValues.push(smoothValues[i-1]);
+                        wayPointValues.push(smoothValues[i - 1]);
                         goUp = true;
                         if (currentEle < lowestPoint) {
                             lowestPoint = currentEle;
                         }
-                    }else{
+                    } else {
                         // still going down
                     }
                 }
             }
             previousEle = currentEle;
         }
-        wayPointValues.push(smoothValues[dataLength-1]);
+        wayPointValues.push(smoothValues[dataLength - 1]);
 
         var totalDeltaElevation = highestPoint - lowestPoint;
         console.log('highest point: ' + highestPoint + '; lowestPoint: ' + lowestPoint + '; delta elevation: ' + totalDeltaElevation);
@@ -331,7 +331,7 @@ $(document).ready(function(){
         for (var i = 0; i < clearedWP.length - 2; i++) {
             var point = clearedWP[i];
             //if(point.waypoint && point.waypoint.type ==='valley'){
-                var nextPoint = clearedWP[i+1];
+            var nextPoint = clearedWP[i + 1];
 
             var slopeInfo = getSlopeInfo(point, nextPoint);
             /*var deltaDistance = nextPoint.totalDistance - point.totalDistance;
@@ -388,21 +388,31 @@ $(document).ready(function(){
             three = currentWaypointPoints[i + 2];
             four = currentWaypointPoints[i + 3];
 
-            var deltaDistanceSlope = Math.abs(two.totalDistance - three.totalDistance);
-            var deltaDistanceSegment = Math.abs(one.totalDistance - four.totalDistance);
-            var deltaEleSlope = Math.abs(two.ele - three.ele);
-            var deltaEleSegment = Math.abs(one.ele - four.ele);
+            var deltaDistanceSegment = two.totalDistance - three.totalDistance;
+            var deltaDistanceGroup = one.totalDistance - four.totalDistance;
+            two.deltaDistanceProcent = deltaDistanceSegment / deltaDistanceGroup;
 
-            two.deltaDistanceProcent = deltaDistanceSlope / deltaDistanceSegment;
-            two.deltaEleProcent = deltaEleSlope / deltaEleSegment;
+            var deltaEleSegment = two.ele - three.ele;
+            var deltaEleGroup = one.ele - four.ele;
+            two.deltaEleProcent = deltaEleSegment / deltaEleGroup;
 
-            if (two.deltaDistanceProcent < 0.15 && two.deltaEleProcent < 0.15) {
-                //console.log("skipping: " + i + " " + deltaDistanceSlope + " " + deltaEleSlope);
+            var slopeInfoSegment = getSlopeInfo(one, two);
+            var slopeInfoGroup = getSlopeInfo(one, four);
+            var deltaSlope = slopeInfoGroup.slope - slopeInfoSegment.slope;
 
-                i++;
-            } else {
-                //console.log("not skipping: " + i + " " + deltaDistanceSlope + " " + deltaEleSlope);
+
+            if (Math.abs(two.deltaDistanceProcent) > 0.15 && Math.abs(two.deltaEleProcent) > 0.15) {
+                //console.log("not skipping: " + i + " " + deltaDistanceSegment + " " + deltaEleSegment);
                 clearedWP.push(two);
+            } else {
+                console.log("deltaSlope: " + deltaSlope + " " + slopeInfoSegment.slope * 100 + " " + slopeInfoGroup.slope * 100);
+                if (Math.abs(deltaSlope) > 0.015) {
+                    console.log("not skipping: " + i + " " + deltaSlope);
+                    clearedWP.push(two);
+                } else {
+                    //console.log("skipping: " + i + " " + deltaDistanceSegment + " " + deltaEleSegment);
+                    i++;
+                }
             }
 
             //console.log(two);
@@ -433,7 +443,7 @@ $(document).ready(function(){
         var previous = null;
         var totalSlope = 0;
         for (var i = 0; i < dataLength; i++) {
-            var point = jQuery.extend(true, {},  toFlatten[i]);
+            var point = jQuery.extend(true, {}, toFlatten[i]);
             if (previous) {
                 var slope = toFlatten[i].slope;
                 distance = distance + point.distance;
@@ -474,7 +484,7 @@ $(document).ready(function(){
             newXML = gpxFile.generateNewHeader(newXML, gpxName, gpxDescription);
             return updateNewXML(newXML);
         } else {
-            return(null);
+            return (null);
         }
     }
 
@@ -492,7 +502,7 @@ $(document).ready(function(){
         $("#newXML").val(newXML);
         var downloadGPX = $("#downloadGPX");
         var fileContents = 'File too large to download...';
-        if (newXML.length > 1100000 ) {
+        if (newXML.length > 1100000) {
             eltDownloadStatus.show();
             canDownload = false;
         } else {
@@ -502,7 +512,7 @@ $(document).ready(function(){
         }
         downloadGPX.attr('href', 'data:text/plain;charset=utf-8,' + fileContents);
         downloadGPX.attr('download', fileName);
-        return(canDownload);
+        return (canDownload);
     }
 
     function reloadValues() {
@@ -520,7 +530,7 @@ $(document).ready(function(){
         var gpxFileInfo = gpxFile.parseGPX(xml);
         gpxName = gpxFileInfo.gpxName;
         gpxDescription = gpxFileInfo.gpxDescription;
-        rawTotalSlope =  gpxFileInfo.totalSlope;
+        rawTotalSlope = gpxFileInfo.totalSlope;
         rawValues = gpxFileInfo.rawValues;
         totalDistance = gpxFileInfo.totalDistance;
 
@@ -542,7 +552,7 @@ $(document).ready(function(){
         if (files.length === 0)
             return;
         var reader = new FileReader();
-        reader.onload = function() {
+        reader.onload = function () {
             xml = reader.result;
             graph.reset();
             parseValues();

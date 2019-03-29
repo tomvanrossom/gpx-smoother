@@ -87,7 +87,7 @@ GPXFile = function() {
                 var trackPoint = wayPoints[iWayPoint];
                 console.log(trackPoint);
 
-                if (trackPoint.waypoint && trackPoint.waypoint.name) {
+                if (trackPoint.waypoint && trackPoint.waypoint.keep) {
                     var newWayPoint = gpxDoc.createElement("wpt");
 
                     newWayPoint.setAttribute('lat', trackPoint.lat);

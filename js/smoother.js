@@ -333,15 +333,16 @@ $(document).ready(function(){
             //if(point.waypoint && point.waypoint.type ==='valley'){
                 var nextPoint = clearedWP[i+1];
 
-                var deltaDistance = nextPoint.totalDistance - point.totalDistance;
-                var deltaEle = nextPoint.ele - point.ele;
-                point.waypoint.deltaDistance = deltaDistance;
-                point.waypoint.deltaEle = deltaEle;
-                point.waypoint.slope = deltaEle / deltaDistance;
-            point.waypoint.name = Math.round(deltaDistance / 100) / 10 + 'K ' + Math.round(100 * point.waypoint.slope) + '%';
+            var slopeInfo = getSlopeInfo(point, nextPoint);
+            /*var deltaDistance = nextPoint.totalDistance - point.totalDistance;
+            var deltaEle = nextPoint.ele - point.ele;
+            point.waypoint.deltaDistance = deltaDistance;
+            point.waypoint.deltaEle = deltaEle;
+            point.waypoint.slope = deltaEle / deltaDistance;*/
+            point.waypoint.name = Math.round(slopeInfo.deltaDistance / 100) / 10 + 'K ' + Math.round(100 * slopeInfo.slope) + '%';
 
             //}
-            if (isWaypointToKeep(point, totalDeltaElevation, totalDistance)) {
+            if (isWaypointToKeep(slopeInfo, totalDeltaElevation, totalDistance)) {
                 point.waypoint.keep = true;
                 keepCounter++;
                 //console.log(point);
@@ -353,10 +354,21 @@ $(document).ready(function(){
         updateNewXML(gpxFile.generateNewGPX(xml, rawValues, clearedWP));
     }
 
-    function isWaypointToKeep(point, totalDeltaElevation, totalDistance) {
-        if (point.waypoint.deltaDistance > 300 && point.waypoint.deltaEle > 40) {
+    function getSlopeInfo(first, second) {
+        var deltaDistance = second.totalDistance - first.totalDistance;
+        var deltaEle = second.ele - first.ele;
+
+        return {
+            deltaDistance: deltaDistance,
+            deltaEle: deltaEle,
+            slope: deltaEle / deltaDistance
+        };
+    }
+
+    function isWaypointToKeep(slopeInfo, totalDeltaElevation, totalDistance) {
+        if (Math.abs(slopeInfo.deltaDistance) > 300 && Math.abs(slopeInfo.deltaEle) > 40) {
             return true
-        } else if (point.waypoint.deltaEle / totalDeltaElevation > 0.05 && point.waypoint.deltaDistance / totalDistance > 0.05) {
+        } else if (Math.abs(slopeInfo.deltaEle / totalDeltaElevation) > 0.05 && Math.abs(slopeInfo.deltaDistance / totalDistance) > 0.05) {
             return true;
         }
         return false;

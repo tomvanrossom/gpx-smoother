@@ -328,6 +328,8 @@ $(document).ready(function () {
         }
 
         var keepCounter = 0;
+        var summitCounter = 0;
+        var valleyCounter = 0;
         for (var i = 0; i < clearedWP.length - 2; i++) {
             var point = clearedWP[i];
             //if(point.waypoint && point.waypoint.type ==='valley'){
@@ -339,16 +341,36 @@ $(document).ready(function () {
             point.waypoint.deltaDistance = deltaDistance;
             point.waypoint.deltaEle = deltaEle;
             point.waypoint.slope = deltaEle / deltaDistance;*/
-            point.waypoint.name = Math.round(slopeInfo.deltaDistance / 100) / 10 + 'K ' + Math.round(100 * slopeInfo.slope) + '%';
-
-            //}
             if (isWaypointToKeep(slopeInfo, totalDeltaElevation, totalDistance)) {
                 point.waypoint.keep = true;
                 keepCounter++;
                 //console.log(point);
+
+                if (point.waypoint.type === 'Valley') {
+                    valleyCounter++;
+                    point.waypoint.name = Math.round(slopeInfo.deltaDistance / 100) / 10 + 'K ' + Math.round(100 * slopeInfo.slope) + '% (' + valleyCounter;
+                } else if (point.waypoint.type === 'Summit') {
+                    summitCounter++;
+                    point.waypoint.name = point.ele + 'm (' + summitCounter;
+                }
+
             }
+
+            //}
+
         }
         console.log('keepCounter: ' + keepCounter);
+
+        for (var i = 0; i < clearedWP.length - 2; i++) {
+            var point = clearedWP[i];
+            if (point.waypoint.keep === true) {
+                if (point.waypoint.type === 'Valley') {
+                    point.waypoint.name = point.waypoint.name + '/' + valleyCounter + ')';
+                } else if (point.waypoint.type === 'Summit') {
+                    point.waypoint.name = point.waypoint.name + '/' + summitCounter + ')';
+                }
+            }
+        }
         graph.setLine(clearedWP, "waypoints", true);
 
         updateNewXML(gpxFile.generateNewGPX(xml, rawValues, clearedWP));
